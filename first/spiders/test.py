@@ -43,7 +43,6 @@ class TestSpider(CrawlSpider):
             if len(year) > 0:
                 txt = charact.xpath('text()').extract()
                 txt = re.sub('<.*?>','',str(txt))
-                txt = re.sub('\'>','',str(txt))
                 print txt
         return
 
@@ -51,9 +50,8 @@ class TestSpider(CrawlSpider):
         if len(charact.xpath('td')) > 0:
             year = charact.xpath('td')[0].re(r'(?i)' + text)
             if len(year) > 0:
-                    txt = charact.xpath('td[2]/span')
+                    txt = charact.xpath('td[2]/span').extract()
                     txt = re.sub('<.*?>','',str(txt))
-                    #txt = re.sub('\'>','',str(txt))
                     print txt
         return
 
@@ -64,10 +62,9 @@ class TestSpider(CrawlSpider):
                 if len(year) > 0:
                     #print charact
                     txt = charact.xpath('td[2]').extract()
-                    print txt
                     txt = re.sub('<.*?>','',str(txt))
-                    #txt = re.sub('\'>','',str(txt))
-                    print txt
+                    #print txt
+                    return txt
         return
 
 
@@ -146,7 +143,7 @@ class TestSpider(CrawlSpider):
         items = []
         for charact in characts:
             item = Board()
-            self.get_char_field_manheimglobaltrader(charact, 'Unit Type')
+            item['year'] = self.get_char_field_manheimglobaltrader(charact, 'Unit Type')
             self.get_char_field_manheimglobaltrader(charact, 'Engine Volume:')
             self.get_char_field_manheimglobaltrader(charact, 'Doors')
             self.get_char_field_manheimglobaltrader(charact, 'Year')
@@ -170,4 +167,5 @@ class TestSpider(CrawlSpider):
             self.get_char_field_manheimglobaltrader(charact, 'Odometer')
             self.get_char_field_manheimglobaltrader(charact, 'Salvage Description')
             self.get_char_field_manheimglobaltrader(charact, 'Driving Side')
+            items.append(item)
         return items
