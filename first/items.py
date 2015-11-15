@@ -5,19 +5,31 @@
 
 from scrapy.item import Item, Field
 
-
 class Website(Item):
     name = Field()
     description = Field()
     url = Field()
 
 class Board(Item):
-    year = Field()
-    description = Field()
-    url = Field()
-
-class FirstItem(Item):
-    # define the fields for your item here like:
-    name = Field()
-    name1 = Field()
-    pass
+    article = Field()
+    price = Field()
+    old_price = Field()
+    weight = Field()
+    image = Field()
+    thumb = Field()
+    vendor = Field()
+    made_in = Field()
+    new = Field()
+    popular = Field()
+    favorite = Field()
+    tags = Field()
+    color = Field()
+    size = Field()
+    source = Field()
+    boatyear = Field()
+    boatbrand = Field()
+    boatmodel = Field()
+    boatlength = Field()
+    boatwidth = Field()
+    boatmotor = Field()
+    boattype = Field()

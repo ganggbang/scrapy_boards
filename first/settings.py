@@ -14,5 +14,9 @@ NEWSPIDER_MODULE = 'first.spiders'
 DEFAULT_ITEM_CLASS = 'first.items.FirstItem'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 ITEM_PIPELINES = ['first.pipelines.SQLStore']
-IMAGES_STORE = './'
 
+ITEM_PIPELINES = {
+    'first.pipelines.SQLStore': 300,
+    'first.pipelines.FirstPipeline': 800,
+}
+IMAGES_STORE = './'
