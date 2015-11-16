@@ -21,12 +21,8 @@ class TestLoader(XPathItemLoader):
     default_input_processor = MapCompose(lambda s: re.sub('(<.*?>|\t|[^a-zA-Z0-9_\/., :-\|]| {2,})', '', s.strip()))
     default_output_processor = Join('\t')
 
-# "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
-# "http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
-#"https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y",
-
 class TestSpider(CrawlSpider):
-    name = 'test'
+    name = 'scraby'
     allowed_domains = ["ebay.com", "copart.com", "www.manheimglobaltrader.com"]
     start_urls = ["https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y",
                 "http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
@@ -158,8 +154,10 @@ class TestSpider(CrawlSpider):
         for img in imgs:
             item = Website()
             item['url'] = img.xpath('@href').extract()
-            item['name'] = img.xpath('@href').extract()
-            print(img.xpath('@href').extract())
+            #tmp = ''.join(item['url'])
+            #print(tmp)
+            #m = re.search('\.\w+\.com',tmp)
+            #item['name'] = m.group(0)
             items.append(item)
         return items
 

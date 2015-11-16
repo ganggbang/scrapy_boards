@@ -10,22 +10,24 @@ import re
 class FirstPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('.jpg$')
     def get_media_requests(self, item, info):
-        return [Request(x, meta={'image_names': item["url"]})
+        return [Request(x, meta={'item': item})
                 for x in item.get('url', [])]
 
-    # this is where the image is extracted from the HTTP response
     def get_images(self, response, request, info):
         for key, image, buf, in super(FirstPipeline, self).get_images(response, request, info):
-            if self.CONVERTED_ORIGINAL.match(key):
-                key = self.change_filename(key, response)
+            #if self.CONVERTED_ORIGINAL.match(key):
+            key = self.change_filename(key, response)
             yield key, image, buf
 
     def change_filename(self, key, response):
-        return "fff/%s.jpg" % response.meta['image_names'][0]
+         #print response.meta['item']['url'][0]
+         m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',response.meta['item']['url'][0].lower())
+         #print m.group(0)
+         return "%s/%s" % (response.meta['item']['name'], m.group(0))
 
 class SQLStore(object):
     def __init__(self):
-        self.conn = MySQLdb.connect(user='root', passwd='coolC00l', db='katerusaru_ktusa', host='localhost', charset="utf8", use_unicode=True)
+        self.conn = MySQLdb.connect(user='root', passwd='coolC00l', db='katera', host='localhost', charset="utf8", use_unicode=True)
         self.cursor = self.conn.cursor()
 
     def process_item(self, items, spider):
