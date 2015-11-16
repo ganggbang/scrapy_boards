@@ -3,7 +3,8 @@
 import re
 
 #from first.items import FirstItem
-from first.items import Website
+#from first.items import Website
+from decimal import Decimal
 from first.items import Board
 
 #from scrapy.selector import HtmlXPathSelector
@@ -66,6 +67,15 @@ class TestSpider(CrawlSpider):
         return ''
 
 
+    def parse_item_ebay_price(self, response):
+        sel = Selector(response)
+        txt = sel.xpath('//span[@class=\'notranslate\']').extract()
+
+        tt = ''.join(txt[0])
+        txt = re.sub('<.*?>','',tt)
+        price = re.sub('[^\d+]','',txt)
+        return price
+
     def parse_item_ebay(self, response):
         # hxs = HtmlXPathSelector(response)
         # l = TestLoader(FirstItem(), hxs)
@@ -75,7 +85,12 @@ class TestSpider(CrawlSpider):
 
         items = []
         item = Board()
-        item['source'] = 'ebay'
+        item['source'] = 2
+        item['vendor'] = 0
+        item['popular'] = 1
+        item['favorite'] = 1
+        item['price'] = self.parse_item_ebay_price(response)
+
         for charact in characts:
 
             f = self.get_char_field_ebay(charact, 'Seller Notes')
@@ -105,17 +120,29 @@ class TestSpider(CrawlSpider):
         return items
         #return l.load_item()
 
+    def parse_item_copart_price(self, response):
+        sel = Selector(response)
+        txt = sel.xpath('//div/span[@class=\'bid\']').extract()
+        tt = ''.join(txt[0])
+        txt = re.sub('<.*?>','',tt)
+        price = re.sub('[^\d+]','',txt)
+
+        #print price
+
+        return price
+
     def parse_item_copart(self, response):
-        # hxs = HtmlXPathSelector(response)
-        # l = TestLoader(FirstItem(), hxs)
-        # l.add_xpath('name', '//div[@class=\'lot-display-list\']/div')
-        # return l.load_item()
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'lot-display-list\']/div')
 
         items = []
         item = Board()
-        item['source'] = 'copart'
+        item['source'] = 2
+        item['vendor'] = 0
+        item['popular'] = 1
+        item['favorite'] = 1
+        item['price'] = self.parse_item_copart_price(response)
+
         for charact in characts:
             #item[''] = self.get_char_field_copart(charact, 'Doc Type')
             #item[''] = self.get_char_field_copart(charact, 'Odometer')
@@ -147,19 +174,17 @@ class TestSpider(CrawlSpider):
             return True
         return False
 
-    def parse_item_manheimglobaltrader_images(self, response):
-        sel = Selector(response)
-        imgs = sel.xpath('//li/a[@class=\'thumb\']')
-        items = []
-        for img in imgs:
-            item = Website()
-            item['url'] = img.xpath('@href').extract()
-            #tmp = ''.join(item['url'])
-            #print(tmp)
-            #m = re.search('\.\w+\.com',tmp)
-            #item['name'] = m.group(0)
-            items.append(item)
-        return items
+    def parse_manheimglobaltrader_price(self, response):
+        price = 0
+        # sel = Selector(response)
+        # #<span class="bid">$6,200 USD</span>
+        # characts = sel.xpath('//span[@class=\'bid\']')
+
+        # print characts
+        # for charact in characts:
+        #     price = '1'
+
+        return price
 
     def parse_item_manheimglobaltrader(self, response):
         sel = Selector(response)
@@ -167,7 +192,12 @@ class TestSpider(CrawlSpider):
 
         items = []
         item = Board()
-        item['source'] = 'manheimglobaltrader'
+        item['source'] = 2
+        item['vendor'] = 0
+        item['popular'] = 1
+        item['favorite'] = 1
+        item['price'] = self.parse_manheimglobaltrader_price(response)
+
         for charact in characts:
             #item[''] = self.get_char_field_manheimglobaltrader(charact, 'Engine Volume:')
             #item[''] = self.get_char_field_manheimglobaltrader(charact, 'Doors')

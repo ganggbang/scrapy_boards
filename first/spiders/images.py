@@ -2,10 +2,7 @@
 
 import re
 
-from scrapy.utils.project import get_project_settings
 from first.items import Website
-from first.items import Board
-
 #from scrapy.selector import HtmlXPathSelector
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.contrib.loader import XPathItemLoader

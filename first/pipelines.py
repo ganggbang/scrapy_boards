@@ -5,6 +5,7 @@ from scrapy.http import Request
 import MySQLdb
 #import hashlib
 #from cStringIO import StringIO
+from types import *
 import re
 
 class FirstPipeline(ImagesPipeline):
@@ -38,9 +39,12 @@ class SQLStore(object):
             query_value = ''
             for key in items:
                 query_keys += MySQLdb.escape_string(key)+', '
-                query_value += "\""+MySQLdb.escape_string(items[key])+"\", "
+                if type(items[key]) is IntType:
+                    query_value += ""+str(items[key])+", "
+                else:
+                    query_value += "\""+MySQLdb.escape_string(items[key])+"\", "
             q = """INSERT INTO modx_ms2_products(%s) VALUES (%s)""" % (query_keys[:-2], query_value[:-2])
-            #print q
+            print q
             self.cursor.execute(q)
             #$print query_keys
             #print query_value
