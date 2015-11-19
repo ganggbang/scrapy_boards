@@ -1,19 +1,23 @@
-from scrapy.contrib.pipeline.images import ImagesPipeline
-from scrapy.http import Request
-#from PIL import Image
-#import sys
-import MySQLdb
-#import hashlib
-#from cStringIO import StringIO
-from types import *
+# from types import *
+#from scrapy.exporter import CsvItemExporter
+#from scrapy.contrib.exporter import CsvItemExporter
 import re
 
+from scrapy.conf import settings
+from scrapy.contrib.exporter import CsvItemExporter
+from scrapy.contrib.pipeline.images import ImagesPipeline
+from scrapy.http import Request
+
+        # for x,v in item.items():
+        #     if x.startswith('url'):
+        #         print v
 class FirstPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('.jpg$')
     def get_media_requests(self, item, info):
-        return [Request(x, meta={'item': item})
-                for x in item.get('url', [])]
-
+        #print item
+        return [Request(''.join(v), meta={'item': item})
+            for x,v in item.items() if x.startswith('url')]
+#for x in item.get('url', [])
     def get_images(self, response, request, info):
         for key, image, buf, in super(FirstPipeline, self).get_images(response, request, info):
             #if self.CONVERTED_ORIGINAL.match(key):
@@ -21,34 +25,18 @@ class FirstPipeline(ImagesPipeline):
             yield key, image, buf
 
     def change_filename(self, key, response):
-         #print response.meta['item']['url'][0]
-         m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',response.meta['item']['url'][0].lower())
-         #print m.group(0)
-         return "%s/%s" % (response.meta['item']['name'], m.group(0))
+        for x,v in response.meta['item'].items():
+            if x.startswith('url'):
+                http_url = ''.join(v).lower()
+                m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',http_url)
+                if m:
+                    return "%s/%s" % (response.meta['item']['name'], m.group(0))
+        return
 
-class SQLStore(object):
-    def __init__(self):
-        self.conn = MySQLdb.connect(user='root', passwd='coolC00l', db='katera', host='localhost', charset="utf8", use_unicode=True)
-        self.cursor = self.conn.cursor()
-
-    def process_item(self, items, spider):
-        if spider.name in ['images']:
-            return items
-        try:
-            query_keys = ''
-            query_value = ''
-            for key in items:
-                query_keys += MySQLdb.escape_string(key)+', '
-                if type(items[key]) is IntType:
-                    query_value += ""+str(items[key])+", "
-                else:
-                    query_value += "\""+MySQLdb.escape_string(items[key])+"\", "
-            q = """INSERT INTO modx_ms2_products(%s) VALUES (%s)""" % (query_keys[:-2], query_value[:-2])
-            print q
-            self.cursor.execute(q)
-            #$print query_keys
-            #print query_value
-            self.conn.commit()
-        except MySQLdb.Error, e:
-            print "Error %d: %s" % (e.args[0], e.args[1])
-        return items
+class ProductCSVExporter(CsvItemExporter):
+     def __init__(self, *args, **kwargs):
+        kwargs['fields_to_export'] = settings.getlist('EXPORT_FIELDS') or None
+        kwargs['encoding'] = settings.get('EXPORT_ENCODING', 'utf-8')
+        delimiter = settings.get('CSV_DELIMITER', ',')
+        kwargs['delimiter'] = delimiter
+        super(ProductCSVExporter, self).__init__(*args, **kwargs)

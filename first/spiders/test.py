@@ -3,7 +3,7 @@
 import re
 
 #from first.items import FirstItem
-#from first.items import Website
+from first.items import Website
 from decimal import Decimal
 from first.items import Board
 
@@ -24,16 +24,17 @@ class TestLoader(XPathItemLoader):
 
 class TestSpider(CrawlSpider):
     name = 'scraby'
-    allowed_domains = ["ebay.com", "copart.com", "www.manheimglobaltrader.com"]
+    allowed_domains = ["ebay.com", "copart.com", "www.manheimglobaltrader.com", "boattrader.com"]
     start_urls = ["https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y",
                 "http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
-                "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684"]
+                "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684"
+                "http://www.boattrader.com/search-results/NewOrUsed-any/Type-all/Category-all/Radius-200/Sort-Length:DESC"]
     rules = (
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3/a')), callback = 'parse_item_ebay'),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
+        #Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3/a')), callback = 'parse_item_ebay'),
+        #Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//td/table[@class=\'search_name_cell\']/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
+        #Rule(SgmlLinkExtractor(restrict_xpaths = ('//div/a')), callback = 'parse_item_boattrader'),
     )
-
 
     def list_xpath_to_str(self, charact, xpath):
         txt = charact.xpath(xpath).extract()
@@ -85,20 +86,17 @@ class TestSpider(CrawlSpider):
 
         items = []
         item = Board()
-        item['source'] = 2
-        item['vendor'] = 0
-        item['popular'] = 1
-        item['favorite'] = 1
+
         item['price'] = self.parse_item_ebay_price(response)
 
         for charact in characts:
 
             f = self.get_char_field_ebay(charact, 'Seller Notes')
             if self.is_notnull_item(f):
-                item['article'] = f
+                item['content'] = f
             f = self.get_char_field_ebay(charact, 'year')
             if self.is_notnull_item(f):
-                item['boatyear'] = f
+                item['boatyear'] = re.sub("[^\d]","",f)
             f = self.get_char_field_ebay(charact, 'Model')
             if self.is_notnull_item(f):
                 item['boatmodel'] = f
@@ -107,7 +105,7 @@ class TestSpider(CrawlSpider):
                 item['boatbrand'] = f
             f = self.get_char_field_ebay(charact, 'Length')
             if self.is_notnull_item(f):
-                item['boatlength'] = f
+                item['boatlength'] = re.sub("[^\d]","",f)
             #item[''] = self.get_char_field_ebay(charact, 'Beam')
             #item[''] = self.get_char_field_ebay(charact, 'Use')
             #item[''] = self.get_char_field_ebay(charact, 'Hull Material')
@@ -117,8 +115,34 @@ class TestSpider(CrawlSpider):
             if self.is_notnull_item(f):
                 item['boattype'] = f
         items.append(item)
+
+
+        sel = Selector(response)
+        imgs = sel.xpath('//tr/td[@class=\'tdThumb\']/div/img')
+        items = []
+
+        img_index = 0
+
+        for img in imgs:
+
+            if img_index > 41:
+                break
+            item_image_index = "gallery%s" % img_index
+            item_url_index = "url%s" % img_index
+            item[item_url_index] = img.xpath('@src').extract()
+            item[item_image_index] = img.xpath('@src').extract()
+
+            tmp = ''.join(item[item_url_index])
+            m = re.search('\w+\.com',tmp)
+            if m:
+                item['name'] = m.group(0)
+                if m:
+                    m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
+                    item[item_image_index] = "%s/%s" % (item['name'], m.group(0))
+                    img_index += 1
+
+        items.append(item)
         return items
-        #return l.load_item()
 
     def parse_item_copart_price(self, response):
         sel = Selector(response)
@@ -137,10 +161,6 @@ class TestSpider(CrawlSpider):
 
         items = []
         item = Board()
-        item['source'] = 2
-        item['vendor'] = 0
-        item['popular'] = 1
-        item['favorite'] = 1
         item['price'] = self.parse_item_copart_price(response)
 
         for charact in characts:
@@ -165,8 +185,42 @@ class TestSpider(CrawlSpider):
             #item[''] = self.get_char_field_copart(charact, 'Downloads')
             f = self.get_char_field_copart(charact, 'Notes')
             if self.is_notnull_item(f):
-                item['article'] = f
+                item['content'] = f
         items.append(item)
+
+
+        sel = Selector(response)
+        imgs = sel.xpath('//div[@class=\'navigation\']/div/ul/li/img')
+        items = []
+
+        img_index = 0
+        for img in imgs:
+
+            if img_index > 41:
+                break
+            item_image_index = "gallery%s" % img_index
+            item_url_index = "url%s" % img_index
+            item[item_image_index] = img.xpath('@src').extract()
+            item[item_url_index] = img.xpath('@src').extract()
+
+            tmp = ''.join(item[item_image_index])
+            if len(tmp) == 0:
+                continue
+
+            item[item_url_index] = ['http:' + x for x in item[item_url_index]]
+            m = re.search('\w+\.com',tmp)
+            if m:
+                item['name'] = m.group(0)
+                if m:
+                    m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
+                    item[item_image_index] = "%s/%s" % (item['name'], m.group(0))
+                    img_index += 1
+        items.append(item)
+        return items
+
+
+
+
         return items
 
     def is_notnull_item(self, str):
@@ -186,16 +240,65 @@ class TestSpider(CrawlSpider):
 
         return price
 
+    def get_char_field_boattrader(self, charact, text):
+        #print charact
+        if len(charact.xpath('th')) > 0:
+            block_find = charact.xpath('th')[0].re(r'(?i)' + text)
+            if len(block_find) > 0:
+                txt = self.list_xpath_to_str(charact,'td')
+                #print txt
+                return txt
+        return ''
+
+    def parse_boattrader_price(self, response):
+        price = 0
+        return price
+
+    def parse_item_boattrader(self, response):
+        sel = Selector(response)
+        characts = sel.xpath('//div[@class=\'collapsible open\']/table/tbody/tr')
+
+        items = []
+        item = Board()
+        item['price'] = self.parse_boattrader_price(response)
+
+        for charact in characts:
+            f = self.get_char_field_boattrader(charact, 'Class')
+            if self.is_notnull_item(f):
+                item['boattype'] = f
+            f = self.get_char_field_boattrader(charact, 'Category')
+            if self.is_notnull_item(f):
+                item['boattype'] = f
+            f = self.get_char_field_boattrader(charact, 'Year')
+            if self.is_notnull_item(f):
+                item['boatyear'] = re.sub("[^\d]","",f)
+            f = self.get_char_field_boattrader(charact, 'Make')
+            if self.is_notnull_item(f):
+                item['boatbrand'] = f
+            f = self.get_char_field_boattrader(charact, 'Length')
+            if self.is_notnull_item(f):
+                item['boatlength'] = re.sub("[^\d]","",f)
+            #f = self.get_char_field_boattrader(charact, 'Propulsion Type')
+            #if self.is_notnull_item(f):
+            #    item['boattype'] = f
+            #f = self.get_char_field_boattrader(charact, 'Hull Material')
+            #if self.is_notnull_item(f):
+            #    item['boattype'] = f
+            #f = self.get_char_field_boattrader(charact, 'Fuel Type')
+            #if self.is_notnull_item(f):
+            #    item['boattype'] = f
+            #f = self.get_char_field_boattrader(charact, 'Location')
+            #if self.is_notnull_item(f):
+            #    item['boattype'] = f
+        items.append(item)
+        return items
+
     def parse_item_manheimglobaltrader(self, response):
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'top\']/table/tr')
 
         items = []
         item = Board()
-        item['source'] = 2
-        item['vendor'] = 0
-        item['popular'] = 1
-        item['favorite'] = 1
         item['price'] = self.parse_manheimglobaltrader_price(response)
 
         for charact in characts:
@@ -207,7 +310,7 @@ class TestSpider(CrawlSpider):
                 item['boattype'] = f
             f = self.get_char_field_manheimglobaltrader(charact, 'Year')
             if self.is_notnull_item(f):
-                item['boatyear'] = f
+                item['boatyear'] = re.sub("[^\d]","",f)
             f = self.get_char_field_manheimglobaltrader(charact, 'Make')
             if self.is_notnull_item(f):
                 item['boatbrand'] = f
@@ -237,4 +340,32 @@ class TestSpider(CrawlSpider):
             #item[''] = self.get_char_field_manheimglobaltrader(charact, 'Salvage Description')
             #item[''] = self.get_char_field_manheimglobaltrader(charact, 'Driving Side')
         items.append(item)
+
+
+        sel = Selector(response)
+        imgs = sel.xpath('//li/a[@class=\'thumb\']')
+        items = []
+
+        img_index = 0
+
+        for img in imgs:
+
+            if img_index > 41:
+                break
+            item_image_index = "gallery%s" % img_index
+            item_url_index = "url%s" % img_index
+            item[item_image_index] = img.xpath('@href').extract()
+            item[item_url_index] = img.xpath('@href').extract()
+
+            tmp = ''.join(item[item_image_index])
+            m = re.search('\w+\.com',tmp)
+            if m:
+                item['name'] = m.group(0)
+                if m:
+                    m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
+                    item[item_image_index] = "%s/%s" % (item['name'], m.group(0))
+                    img_index += 1
+
+        items.append(item)
+
         return items
