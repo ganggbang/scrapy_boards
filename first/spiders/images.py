@@ -75,10 +75,10 @@ class TestSpider(CrawlSpider):
         for img in imgs:
             item = Website()
             item['url'] = img.xpath('@src').extract()
-            print item['url']
+
             tmp = ''.join(item['url'])
             m = re.search('\w+\.com',tmp)
             item['name'] = m.group(0)
-            print item['name']
+
             items.append(item)
         return items

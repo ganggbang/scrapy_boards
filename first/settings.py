@@ -12,7 +12,7 @@ BOT_VERSION = '1.0'
 SPIDER_MODULES = ['first.spiders']
 NEWSPIDER_MODULE = 'first.spiders'
 DEFAULT_ITEM_CLASS = 'first.items.Board'
-USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0 Iceweasel/31.7.0'
 
 ITEM_PIPELINES = ['first.pipelines.FirstPipeline']
 
@@ -21,13 +21,17 @@ FEED_EXPORTERS = {
 
 }
 
+DEFAULT_REQUEST_HEADERS = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en',
+}
+
 EXPORT_FIELDS = [
     'content',
     'price',
     'old_price',
     'pagetitle',
     'boatyear',
-    'gallery',
     'boatbrand',
     'boatmodel',
     'boatlength',
@@ -36,6 +40,8 @@ EXPORT_FIELDS = [
     'boattype',
     'parent',
     'template',
+    'from_url',
+    'gallery0',
     'gallery1',
     'gallery2',
     'gallery3',

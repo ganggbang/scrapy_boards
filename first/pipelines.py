@@ -15,9 +15,11 @@ class FirstPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('.jpg$')
     def get_media_requests(self, item, info):
         #print item
+        #for x,v in item.items():
+        #    print x
         return [Request(''.join(v), meta={'item': item})
             for x,v in item.items() if x.startswith('url')]
-#for x in item.get('url', [])
+
     def get_images(self, response, request, info):
         for key, image, buf, in super(FirstPipeline, self).get_images(response, request, info):
             #if self.CONVERTED_ORIGINAL.match(key):
@@ -37,6 +39,6 @@ class ProductCSVExporter(CsvItemExporter):
      def __init__(self, *args, **kwargs):
         kwargs['fields_to_export'] = settings.getlist('EXPORT_FIELDS') or None
         kwargs['encoding'] = settings.get('EXPORT_ENCODING', 'utf-8')
-        delimiter = settings.get('CSV_DELIMITER', ',')
+        delimiter = settings.get('CSV_DELIMITER', '\t')
         kwargs['delimiter'] = delimiter
         super(ProductCSVExporter, self).__init__(*args, **kwargs)

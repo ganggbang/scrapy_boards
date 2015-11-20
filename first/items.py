@@ -19,6 +19,7 @@ class Board(Item):
     image = Field()
     color = Field()
     size = Field()
+    from_url = Field()
     url0 = Field()
     url1 = Field()
     url2 = Field()
