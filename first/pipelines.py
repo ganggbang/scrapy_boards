@@ -14,6 +14,9 @@ from scrapy.http import Request
 class FirstPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('.jpg$')
     def get_media_requests(self, item, info):
+        item.setdefault('pagetitle', item['boatyear']+' '+item['boatbrand']+' '+item['boatmodel'])
+        item.setdefault('parent', '1653')
+        item.setdefault('template', '5')
         #print item
         #for x,v in item.items():
         #    print x

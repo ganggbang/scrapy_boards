@@ -15,6 +15,8 @@ class Board(Item):
     price = Field()
     old_price = Field()
     pagetitle = Field()
+    parent = Field()
+    template = Field()
     weight = Field()
     image = Field()
     color = Field()
