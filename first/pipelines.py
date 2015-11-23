@@ -35,7 +35,7 @@ class FirstPipeline(ImagesPipeline):
                 http_url = ''.join(v).lower()
                 m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',http_url)
                 if m:
-                    return " ../../%s/%s" % (response.meta['item']['name'], m.group(0))
+                    return "%s/%s" % (response.meta['item']['name'], m.group(0))
         return
 
 class ProductCSVExporter(CsvItemExporter):
