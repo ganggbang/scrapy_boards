@@ -36,7 +36,7 @@ class TestSpider(CrawlSpider):
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//td[@class=\'pagn-next\']/a')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
-        #Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
+        Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//td/table[@class=\'search_name_cell\']/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
