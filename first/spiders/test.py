@@ -36,7 +36,7 @@ class TestSpider(CrawlSpider):
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//td[@class=\'pagn-next\']/a')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
+        #Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//td/table[@class=\'search_name_cell\']/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
@@ -186,25 +186,41 @@ class TestSpider(CrawlSpider):
     def parse_item_copart_price(self, response):
         sel = Selector(response)
         txt = sel.xpath('//div/span[@class=\'bid\']').extract()
-        tt = ''.join(txt[0])
-        txt = re.sub('<.*?>','',tt)
-        price = re.sub('[^\d+]','',txt)
+        if len(txt) > 0:
+            tt = ''.join(txt[0])
+            txt = re.sub('<.*?>','',tt)
+            price = re.sub('[^\d+]','',txt)
+            return price
+        return
 
-        #print price
+    def get_copart_titlehead(self, response):
+        sel = Selector(response)
+        txt = sel.xpath('//div[@id=\'TitleHead\']/h2').extract()
 
-        return price
+        if len(txt) > 0:
+            tt = ''.join(txt[0])
+            txt = re.sub('<.*?>','',tt)
+            return txt
+        return
 
     def parse_item_copart(self, response):
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'lot-display-list\']/div')
 
+        titlehead = self.get_copart_titlehead(response)
+        print titlehead
+
         items = []
         item = Board()
-        item['boatmodel'] = ''
-        item['boatyear'] = ''
+        item['boatmodel'] = re.sub('^\d+\s','',titlehead)
+        m = re.search('^\d+\s',titlehead)
+        if m:
+            item['boatyear'] = m.group(0)
         item['boatbrand'] = ''
         item['old_price'] = self.parse_item_copart_price(response)
         item['from_url'] = response.url
+
+        print item
 
         for charact in characts:
             #item[''] = self.get_char_field_copart(charact, 'Doc Type')
@@ -237,6 +253,7 @@ class TestSpider(CrawlSpider):
         items = []
 
         img_index = 0
+
         for img in imgs:
 
             if img_index > 41:
@@ -258,7 +275,7 @@ class TestSpider(CrawlSpider):
                 item['name'] = m.group(0)
                 if m:
                     m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
-                    item[item_image_index] = "../../%s/%s" % (item['name'], m.group(0))
+                    item[item_image_index] = "/home/k/katerusaru/katerusa.ru/public_html/tmp/%s/%s" % (item['name'], m.group(0))
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
                     img_index += 1
         items.append(item)
