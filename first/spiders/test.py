@@ -275,7 +275,7 @@ class TestSpider(CrawlSpider):
                 item['name'] = m.group(0)
                 if m:
                     m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
-                    item[item_image_index] = "/home/k/katerusaru/katerusa.ru/public_html/tmp/%s/%s" % (item['name'], m.group(0))
+                    item[item_image_index] = "/tmp/%s/%s" % (item['name'], m.group(0))
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
                     item[item_image_index] = re.sub('.jpg$','X.JPG',item[item_image_index])
                     item[item_url_index] = re.sub('.jpg$','X.JPG',item[item_url_index][0].lower())
