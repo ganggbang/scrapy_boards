@@ -279,7 +279,7 @@ class TestSpider(CrawlSpider):
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
                     item[item_image_index] = re.sub('.jpg$','X.JPG',item[item_image_index])
                     item[item_url_index] = re.sub('.jpg$','X.JPG',item[item_url_index][0].lower())
-                    print item[item_url_index]
+                    #print item[item_url_index]
                     img_index += 1
         items.append(item)
         return items

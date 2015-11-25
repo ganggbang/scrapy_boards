@@ -35,13 +35,13 @@ class FirstPipeline(ImagesPipeline):
                 http_url = ''.join(v).lower()
                 m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',http_url)
                 if m:
-                    return "%s/%s" % (response.meta['item']['name'], m.group(0))
+                    return "%s/%s" % (response.meta['item']['name'], m.group(0).upper())
         return
 
 class ProductCSVExporter(CsvItemExporter):
      def __init__(self, *args, **kwargs):
         kwargs['fields_to_export'] = settings.getlist('EXPORT_FIELDS') or None
         kwargs['encoding'] = settings.get('EXPORT_ENCODING', 'utf-8')
-        delimiter = settings.get('CSV_DELIMITER', '\t')
+        delimiter = settings.get('CSV_DELIMITER', '|')
         kwargs['delimiter'] = delimiter
         super(ProductCSVExporter, self).__init__(*args, **kwargs)
