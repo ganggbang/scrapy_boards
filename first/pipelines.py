@@ -14,9 +14,7 @@ class FirstPipeline(ImagesPipeline):
         item.setdefault('pagetitle', item['boatyear']+' '+item['boatbrand']+' '+item['boatmodel'])
         item.setdefault('parent', '1653')
         item.setdefault('template', '5')
-        #print item
-        #for x,v in item.items():
-        #    print x
+
         return [Request(''.join(v), meta={'item': item})
             for x,v in item.items() if x.startswith('url')]
 
@@ -34,16 +32,6 @@ class FirstPipeline(ImagesPipeline):
                             key = re.sub('//','/',key)
                             break
             yield key, image, buf
-
-    # def change_filename(self, key, response):
-    #     for (x, item) in response.meta['item'].items():
-    #         if x.startswith('url'):
-    #     #        print x, item
-    #             http_url = ''.join(item).lower()
-    #             #print http_url
-    #             m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',http_url)
-    #             if m:
-    #                 return "%s/%s" % (response.meta['item']['name'], m.group(0).upper())
 
 class ProductCSVExporter(CsvItemExporter):
      def __init__(self, *args, **kwargs):
