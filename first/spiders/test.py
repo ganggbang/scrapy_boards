@@ -29,8 +29,8 @@ class TestSpider(CrawlSpider):
     start_urls = [
                 #"https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y",
                 #"http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
-                #"http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
-                "http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
+                "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
+                #"http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
                 ]
     rules = (
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
@@ -39,7 +39,7 @@ class TestSpider(CrawlSpider):
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//td/table[@class=\'search_name_cell\']/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
+        Rule(SgmlLinkExtractor(restrict_xpaths = ('//li/div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[contains(text(),\'>\')]')), follow=True),
     )
 
@@ -344,10 +344,10 @@ class TestSpider(CrawlSpider):
         for charact in characts:
             f = self.get_char_field_boattrader(charact, 'Class')
             if self.is_notnull_item(f):
-                item['boattype'] = f
+                item['boattype'] = re.sub("^\s","",f)
             f = self.get_char_field_boattrader(charact, 'Category')
             if self.is_notnull_item(f):
-                item['boattype'] = f
+                item['boattype'] = re.sub("^\s","",f)
             f = self.get_char_field_boattrader(charact, 'Year')
             if self.is_notnull_item(f):
                 item['boatyear'] = re.sub("[^\d]","",f)
@@ -373,26 +373,23 @@ class TestSpider(CrawlSpider):
 
         sel = Selector(response)
 
-        imgs = sel.xpath('//img[contains(@src,\'http://images0.boattrader.com\')]')
+        imgs = sel.xpath('//div[@class=\'carousel\']/ul/li')
         items = []
-
-        #print imgs
         img_index = 0
 
         for img in imgs:
 
-            #print img
             if img_index > 41:
                 break
             item_image_index = "gallery%s" % img_index
             item_url_index = "url%s" % img_index
 
-            tmp = ''.join(img.xpath('@src').extract())
+            tmp = ''.join(img.xpath('@data-src_w0').extract())
             if len(tmp) == 0:
                 continue
 
-            item[item_image_index] = img.xpath('@src').extract()
-            item[item_url_index] = img.xpath('@src').extract()
+            item[item_image_index] = img.xpath('@data-src_w0').extract()
+            item[item_url_index] = img.xpath('@data-src_w0').extract()
 
             m = re.search('.*.jpg',item[item_url_index][0])
             if m:
