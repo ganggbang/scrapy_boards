@@ -33,14 +33,14 @@ class TestSpider(CrawlSpider):
                 #"http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
                 ]
     rules = (
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//td[@class=\'pagn-next\']/a')), follow=True),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//td/table[@class=\'search_name_cell\']/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//li/div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
-        Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[contains(text(),\'>\')]')), follow=True),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('//td[@class=\'pagn-next\']/a')), follow=True),
+         Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('//td/table[@class=\'search_name_cell\']/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('//li/div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
+        # Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[contains(text(),\'>\')]')), follow=True),
     )
 
     def list_xpath_to_str(self, charact, xpath):
@@ -276,11 +276,11 @@ class TestSpider(CrawlSpider):
             if m:
                 item['name'] = m.group(0)
                 if m:
-                    m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
+                    m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0], flags=re.IGNORECASE)
                     item[item_image_index] = "/tmp/%s/%s" % (item['name'], m.group(0))
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
-                    item[item_image_index] = re.sub('.jpg$','x.jpg',item[item_image_index])
-                    item[item_url_index] = re.sub('.jpg$','x.jpg',item[item_url_index][0].lower())
+                    item[item_image_index] = re.sub('.jpg$','x.jpg',item[item_image_index], flags=re.IGNORECASE)
+                    item[item_url_index] = re.sub('.jpg$','x.jpg',item[item_url_index][0], flags=re.IGNORECASE)
                     #print item[item_url_index]
                     img_index += 1
         items.append(item)

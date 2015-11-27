@@ -26,9 +26,9 @@ class FirstPipeline(ImagesPipeline):
             for (x, item) in response.meta['item'].items():
                 if x.startswith('url'):    
                     if request.url == response.meta['item'][x]:
-                        m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',request.url.lower())
+                        m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',request.url.lower(), flags=re.IGNORECASE)
                         if m:
-                            key = "%s/%s" % (response.meta['item']['name'], m.group(0).lower())
+                            key = "%s/%s" % (response.meta['item']['name'], m.group(0))
                             key = re.sub('//','/',key)
                             break
             yield key, image, buf
