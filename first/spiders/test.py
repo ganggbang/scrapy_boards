@@ -29,8 +29,8 @@ class TestSpider(CrawlSpider):
     start_urls = [
                 #"https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y",
                 #"http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
-                "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
-                #"http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
+                #"http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
+                "http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
                 ]
     rules = (
         Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
@@ -279,8 +279,8 @@ class TestSpider(CrawlSpider):
                     m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',item[item_image_index][0].lower())
                     item[item_image_index] = "/tmp/%s/%s" % (item['name'], m.group(0))
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
-                    item[item_image_index] = re.sub('.jpg$','X.JPG',item[item_image_index])
-                    item[item_url_index] = re.sub('.jpg$','X.JPG',item[item_url_index][0].lower())
+                    item[item_image_index] = re.sub('.jpg$','x.jpg',item[item_image_index])
+                    item[item_url_index] = re.sub('.jpg$','x.jpg',item[item_url_index][0].lower())
                     #print item[item_url_index]
                     img_index += 1
         items.append(item)
