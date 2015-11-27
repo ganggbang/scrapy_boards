@@ -8,9 +8,6 @@ from scrapy.contrib.exporter import CsvItemExporter
 from scrapy.contrib.pipeline.images import ImagesPipeline
 from scrapy.http import Request
 
-        # for x,v in item.items():
-        #     if x.startswith('url'):
-        #         print v
 class FirstPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('.jpg$')
     def get_media_requests(self, item, info):
@@ -24,19 +21,29 @@ class FirstPipeline(ImagesPipeline):
             for x,v in item.items() if x.startswith('url')]
 
     def get_images(self, response, request, info):
+
         for key, image, buf, in super(FirstPipeline, self).get_images(response, request, info):
             #if self.CONVERTED_ORIGINAL.match(key):
-            key = self.change_filename(key, response)
+            
+            for (x, item) in response.meta['item'].items():
+                if x.startswith('url'):    
+                    if request.url == response.meta['item'][x]:
+                        m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',request.url.lower())
+                        if m:
+                            key = "%s/%s" % (response.meta['item']['name'], m.group(0).lower())
+                            key = re.sub('//','/',key)
+                            break
             yield key, image, buf
 
-    def change_filename(self, key, response):
-        for x,v in response.meta['item'].items():
-            if x.startswith('url'):
-                http_url = ''.join(v).lower()
-                m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',http_url)
-                if m:
-                    return "%s/%s" % (response.meta['item']['name'], m.group(0).upper())
-        return
+    # def change_filename(self, key, response):
+    #     for (x, item) in response.meta['item'].items():
+    #         if x.startswith('url'):
+    #     #        print x, item
+    #             http_url = ''.join(item).lower()
+    #             #print http_url
+    #             m = re.search('(\/[0-9,a-z\-\_]+\/[0-9,a-z\-\_]+|[0-9,a-z\-\_]+).jpg$',http_url)
+    #             if m:
+    #                 return "%s/%s" % (response.meta['item']['name'], m.group(0).upper())
 
 class ProductCSVExporter(CsvItemExporter):
      def __init__(self, *args, **kwargs):
