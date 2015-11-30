@@ -180,7 +180,7 @@ class TestSpider(CrawlSpider):
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
                     item[item_image_index] = re.sub('s-l64.','s-l500_'+str(x)+'.',item[item_image_index])
 
-                    item[item_url_index] = re.sub('s-l64.','s-l500_'+str(x)+'.',item[item_url_index][0])
+                    item[item_url_index] = re.sub('s-l64.','s-l500.',item[item_url_index][0])
                     item[item_url_index] = item[item_url_index]
                     img_index += 1
 
