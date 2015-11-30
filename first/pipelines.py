@@ -26,7 +26,7 @@ class FirstPipeline(ImagesPipeline):
             for (x, item) in response.meta['item'].items():
                 if x.startswith('url'):    
                     if request.url == response.meta['item'][x]:
-                        m = re.search('(\/[0-9,a-z\-\_\~]+\/[0-9,a-z\-\_\~]+|[0-9,a-z\-\_\~]+).jpg$',response.meta['item'][x], flags=re.IGNORECASE)
+                        m = re.search('(\/[0-9,A-Za-z\-\_\~]+\/[0-9,A-Za-z\-\_\~]+|[0-9,A-Za-z\-\_\~]+).jpg$',response.meta['item'][x], flags=re.IGNORECASE)
                         if m:
                             key = "%s/%s" % (response.meta['item']['name'], m.group(0))
                             key = re.sub('//','/',key)
@@ -34,10 +34,11 @@ class FirstPipeline(ImagesPipeline):
             yield key, image, buf
 
 class ProductCSVExporter(CsvItemExporter):
-    
+
      def __init__(self, *args, **kwargs):
         kwargs['fields_to_export'] = settings.getlist('EXPORT_FIELDS') or None
         kwargs['encoding'] = settings.get('EXPORT_ENCODING', 'utf-8')
         delimiter = settings.get('CSV_DELIMITER', '|')
         kwargs['delimiter'] = delimiter
+        kwargs['include_headers_line'] = False
         super(ProductCSVExporter, self).__init__(*args, **kwargs)
