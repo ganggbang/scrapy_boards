@@ -122,8 +122,8 @@ class TestSpider(CrawlSpider):
 
         tt = ''.join(txt[0])
         txt = re.sub('<.*?>','',tt)
-        price = re.sub('[^\d+\.,]','',txt)
-        price = re.sub(',','.',price)
+        price = re.sub('[^\d+\.]','',txt)
+        #price = re.sub(',','.',price)
         return price
 
     def parse_item_ebay(self, response):
@@ -218,11 +218,11 @@ class TestSpider(CrawlSpider):
                 if m:
                     item[item_image_index] = "/tmp/%s/%s" % (item['name'], m.group(0))
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
-                    item[item_image_index] = re.sub('s-l300.','s-l500_'+str(x)+'.',item[item_image_index])
-                    item[item_image_index] = re.sub('s-l64.','s-l500_'+str(x)+'.',item[item_image_index])
+                    item[item_image_index] = re.sub('s-l300.','s-l1600_'+str(x)+'.',item[item_image_index])
+                    item[item_image_index] = re.sub('s-l64.','s-l1600_'+str(x)+'.',item[item_image_index])
 
-                    item[item_url_index] = re.sub('s-l300.','s-l500.',item[item_url_index][0])
-                    item[item_url_index] = re.sub('s-l64.','s-l500.',item[item_url_index])
+                    item[item_url_index] = re.sub('s-l300.','s-l1600.',item[item_url_index][0])
+                    item[item_url_index] = re.sub('s-l64.','s-l1600.',item[item_url_index])
 
                     #item[item_url_index] = re.sub('s-l300.','s-l500.',item[item_url_index][0])
                     #print item
