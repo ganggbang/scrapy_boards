@@ -101,7 +101,7 @@ class TestSpider(CrawlSpider):
             txt_td = txt_td.encode('utf-8')
             #print txt_td
             #print text
-            m = re.search(r'(?i)'+text,txt_td)
+            m = re.search(r'^(?i)'+text,txt_td)
             if m:
                 if len(blocks) > count:
                     return re.sub('<.*?>|\s','',blocks[count].strip())
@@ -166,7 +166,7 @@ class TestSpider(CrawlSpider):
 
             f = self.get_char_field_ebay(charact, 'Length')
             if self.is_notnull_item(f):
-                item['boatlength'] = re.sub("[^\d]","",f)
+                item['boatlength'] = re.sub("[^\d\.]","",f)
 
             #item[''] = self.get_char_field_ebay(charact, 'Beam')
             #item[''] = self.get_char_field_ebay(charact, 'Use')
