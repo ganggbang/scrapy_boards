@@ -123,6 +123,7 @@ class TestSpider(CrawlSpider):
         tt = ''.join(txt[0])
         txt = re.sub('<.*?>','',tt)
         price = re.sub('[^\d+\.,]','',txt)
+        price = re.sub(',','.',price)
         return price
 
     def parse_item_ebay(self, response):
