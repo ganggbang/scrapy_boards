@@ -104,7 +104,7 @@ class TestSpider(CrawlSpider):
             m = re.search(r'^(?i)'+text,txt_td)
             if m:
                 if len(blocks) > count:
-                    return re.sub('<.*?>|\s','',blocks[count].strip())
+                    return re.sub('<.*?>|\s{2,}','',blocks[count].strip())
         return ''
 
     def get_char_field_manheimglobaltrader(self, charact, text):
