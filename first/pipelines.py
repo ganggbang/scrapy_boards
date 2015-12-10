@@ -22,16 +22,23 @@ class FirstPipeline(ImagesPipeline):
 
         for key, image, buf, in super(FirstPipeline, self).get_images(response, request, info):
             #if self.CONVERTED_ORIGINAL.match(key):
-            
+            #print response.meta['item'].items()
             for (x, item) in response.meta['item'].items():
+
                 if x.startswith('url'):    
                     if request.url == response.meta['item'][x]:
+                        print x+" "+request.url + " fonded"
                         n = re.search('\d{1,}',x, flags=re.IGNORECASE)
+                        #print n.group(0)
                         if n:
+                            print x+" "+request.url + " n"
                             index = 'gallery'+n.group(0)
                             key = "%s" % (response.meta['item'][index])
                             key = re.sub('//','/',key)
                             break
+                    #else:
+                        #print response.meta['item'][x]
+                        #print x+" "+request.url + " not fonded"
             yield key, image, buf
 
 class ProductCSVExporter(CsvItemExporter):

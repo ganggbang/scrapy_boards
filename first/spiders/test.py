@@ -15,6 +15,8 @@ from scrapy.contrib.loader.processor import Join
 from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider, Rule
 #from scrapy.selector import HtmlXPathSelector
+import os.path
+
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -25,23 +27,54 @@ class TestLoader(XPathItemLoader):
 
 class TestSpider(CrawlSpider):
     name = 'scraby'
+    mode = None
+    file_path = "./list_urls.txt"
     allowed_domains = ["ebay.com", "copart.com", "www.manheimglobaltrader.com", "boattrader.com"]
-    start_urls = [
-                #"https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y&offset=1&limit=500",
-                #"http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
-                "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
-                #"http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
+
+    def __init__(self, mode=None, file_path=None,*args, **kwargs):
+        super(TestSpider, self).__init__(*args, **kwargs)
+        self.mode = mode
+        if file_path is not None:
+            self.file_path = file_path
+        if os.path.exists(self.file_path):
+            if self.mode == "from_list":
+                self.start_urls = [line.strip() for line in open(self.file_path, 'r')]
+            else:
+                self.rules = (
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//td[@class=\'pagn-next\']/a')), follow=True),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//table[@class=\'search_list_container\']/tr/td[1]/table/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//li/div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
+                      Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[contains(text(),\'>\')]')), follow=True),
+                )
+
+                self.start_urls = [
+                    "https://www.manheimglobaltrader.com/bu/search?se_search_unit_code[]=BO&flag_search_submit=y&offset=1&limit=500",
+                    "http://www.copart.com/us/search?companyCode_vf=US&Sort=sd&LotTypes=M&YearFrom=2000&YearTo=2016&Make=&RadioGroup=Location&YardNumber=&States=&PostalCode=&Distance=500&searchTitle=2000-2016%2C%2C&cn=2000-2016%2C%2C",
+                    "http://www.ebay.com/sch/Boats-/26429/i.html?rt=nc&LH_BIN=1&_trksid=p2045573.m1684",
+                    "http://www.boattrader.com/search-results/NewOrUsed-any/Type-small+boats/Category-all/Radius-200/Sort-Length:DESC",
                 ]
-    rules = (
-          Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
-          Rule(SgmlLinkExtractor(restrict_xpaths = ('//td[@class=\'pagn-next\']/a')), follow=True),
-          #Rule(SgmlLinkExtractor(restrict_xpaths = ('//li[@class=\'lot-desc\']/a')), callback = 'parse_item_copart'),
-          #Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[@class=\'pager-next\']')), follow=True),
-          #Rule(SgmlLinkExtractor(restrict_xpaths = ('//table[@class=\'search_list_container\']/tr/td[1]/table/tr/td/a')), callback = 'parse_item_manheimglobaltrader'),
-          #Rule(SgmlLinkExtractor(restrict_xpaths = ('(//input[@value=\'Next\'])[2]')), follow=True),
-          #Rule(SgmlLinkExtractor(restrict_xpaths = ('//li/div[@class=\'inner\']/a')), callback = 'parse_item_boattrader'),
-          #Rule(SgmlLinkExtractor(restrict_xpaths = ('//a[contains(text(),\'>\')]')), follow=True),
-    )
+                return self.parse_start_url
+                
+        else:
+            print "File %s not exist!\n" % self.file_path
+
+
+    def parse(self, response):
+        if self.mode == "from_list":
+            if response.url.startswith("http://www.ebay.com"):
+                return self.parse_item_ebay(response)
+            elif response.url.startswith("http://www.copart.com"):
+                return self.parse_item_copart(response)
+            elif response.url.startswith("http://www.boattrader.com"):
+                return self.parse_item_boattrader
+            elif response.url.startswith("https://www.manheimglobaltrader.com"):
+                return self.parse_item_manheimglobaltrader
+        else:
+            print "here!"
 
     def list_xpath_to_str(self, charact, xpath):
         txt = charact.xpath(xpath).extract()
@@ -89,7 +122,7 @@ class TestSpider(CrawlSpider):
 
         tt = ''.join(txt[0])
         txt = re.sub('<.*?>','',tt)
-        price = re.sub('[^\d+]','',txt)
+        price = re.sub('[^\d+\.,]','',txt)
         return price
 
     def parse_item_ebay(self, response):
@@ -103,7 +136,7 @@ class TestSpider(CrawlSpider):
         item['boatmodel'] = ''
         item['boatyear'] = ''
         item['boatbrand'] = ''
-        item['price'] = self.parse_item_ebay_price(response)
+        item['old_price'] = self.parse_item_ebay_price(response)
 
         for charact in characts:
             f = self.get_char_field_ebay(charact, 'Seller Notes')
@@ -158,15 +191,15 @@ class TestSpider(CrawlSpider):
 
         items = []
 
-        img_index = 0
+        #img_index = 0
 
         x = 0
         for img in imgs:
             x = x + 1
-            if img_index > 41:
+            if x > 41:
                 break
-            item_image_index = "gallery%s" % img_index
-            item_url_index = "url%s" % img_index
+            item_image_index = "gallery%s" % x
+            item_url_index = "url%s" % x
 
             tmp = ''.join(img.xpath('@src').extract())
             if len(tmp) == 0:
@@ -180,16 +213,20 @@ class TestSpider(CrawlSpider):
             if m:
                 item['name'] = m.group(0)
                 m = re.search('(\/[0-9,A-Za-z\-\_\~]+\/[0-9,A-Za-z\-\_\~]+|[0-9,A-Za-z\-\_\~]+).jpg$',item[item_image_index][0])
+                
                 if m:
                     item[item_image_index] = "/tmp/%s/%s" % (item['name'], m.group(0))
                     item[item_image_index] = re.sub('//','/',item[item_image_index])
-                    item[item_image_index] = re.sub('s-l300.','s-l500_'+str(x)+'.',item[item_image_index])
+                    #item[item_image_index] = re.sub('s-l300.','s-l500_'+str(x)+'.',item[item_image_index])
                     item[item_image_index] = re.sub('s-l64.','s-l500_'+str(x)+'.',item[item_image_index])
 
-                    item[item_url_index] = re.sub('s-l300.','s-l500.',item[item_url_index][0])
-                    item[item_url_index] = re.sub('s-l64.','s-l500.',item[item_url_index])
-                    item[item_url_index] = item[item_url_index]
-                    img_index += 1
+                    #item[item_url_index] = re.sub('s-l300.','s-l500.',item[item_url_index][0])
+                    item[item_url_index] = re.sub('s-l64.','s-l500.',item[item_url_index][0])
+
+                    #item[item_url_index] = re.sub('s-l300.','s-l500.',item[item_url_index][0])
+                    #print item
+                    #x += 1
+
 
         items.append(item)
 
@@ -201,7 +238,7 @@ class TestSpider(CrawlSpider):
         if len(txt) > 0:
             tt = ''.join(txt[0])
             txt = re.sub('<.*?>','',tt)
-            price = re.sub('[^\d+]','',txt)
+            price = re.sub('[^\d+\.,]','',txt)
             return price
         return
 
@@ -330,7 +367,7 @@ class TestSpider(CrawlSpider):
         if txt:
             tt = ''.join(txt[0])
             txt = re.sub('<.*?>','',tt)
-            price = re.sub('[^\d+]','',txt)
+            price = re.sub('[^\d+\.,]','',txt)
         else:
             price = 0
         #print price
