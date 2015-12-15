@@ -137,14 +137,15 @@ class TestSpider(CrawlSpider):
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'itemAttr\']/div/table/tr')
 
-        line = self.list_from_file.split(';')
-        
         items = []
         item = Board()
 
-        if response.url == line[2].strip():
-            item['parent'] = line[0]
-            item['boattype'] = line[1]
+        lines = self.list_from_file.split('\r\n')
+        for line in lines:
+            l = line.split(';')
+            if response.url == l[2].strip():
+                item['parent'] = l[0]
+                item['boattype'] = l[1]
         
         item['from_url'] = response.url
 
@@ -277,6 +278,12 @@ class TestSpider(CrawlSpider):
 
         items = []
         item = Board()
+
+        line = self.list_from_file.split(';')
+        if response.url == line[2].strip():
+            item['parent'] = line[0]
+            item['boattype'] = line[1]
+
         item['boatmodel'] = re.sub('^\d+\s','',titlehead)
         m = re.search('^\d+\s',titlehead)
         if m:
