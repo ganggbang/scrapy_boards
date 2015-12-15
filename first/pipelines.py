@@ -12,8 +12,8 @@ class FirstPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('.jpg$')
     def get_media_requests(self, item, info):
         item.setdefault('pagetitle', item['boatyear']+' '+item['boatbrand']+' '+item['boatmodel'])
-        item.setdefault('parent', '1653')
-        item.setdefault('template', '5')
+        #item.setdefault('parent', '1653')
+        #item.setdefault('template', '5')
 
         return [Request(''.join(v), meta={'item': item})
             for x,v in item.items() if x.startswith('url')]

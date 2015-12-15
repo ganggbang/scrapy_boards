@@ -30,6 +30,7 @@ class TestSpider(CrawlSpider):
     mode = None
     file_path = "./list_urls.txt"
     allowed_domains = ["ebay.com", "copart.com", "www.manheimglobaltrader.com", "boattrader.com"]
+    list_from_file = []
 
     def __init__(self, mode=None, file_path=None,*args, **kwargs):
         super(TestSpider, self).__init__(*args, **kwargs)
@@ -38,7 +39,13 @@ class TestSpider(CrawlSpider):
             self.file_path = file_path
         if os.path.exists(self.file_path):
             if self.mode == "from_list":
-                self.start_urls = [line.strip() for line in open(self.file_path, 'r')]
+                #l = [line.strip() for line in open(self.file_path, 'r')]
+                for line in open(self.file_path, 'r'):
+                    self.list_from_file=line
+                    self.start_urls.append(line.strip().split(';')[2])
+                print(self.start_urls)
+                
+
             else:
                 self.rules = (
                       Rule(SgmlLinkExtractor(restrict_xpaths = ('//h3[@class=\'lvtitle\']/a')), callback = 'parse_item_ebay'),
@@ -130,8 +137,15 @@ class TestSpider(CrawlSpider):
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'itemAttr\']/div/table/tr')
 
+        line = self.list_from_file.split(';')
+        
         items = []
         item = Board()
+
+        if response.url == line[2].strip():
+            item['parent'] = line[0]
+            item['boattype'] = line[1]
+        
         item['from_url'] = response.url
 
         item['boatmodel'] = ''
@@ -184,7 +198,8 @@ class TestSpider(CrawlSpider):
         sel = Selector(response)
         imgs2 = sel.xpath('//img[@class=\"img img300\"]')
 
-        del imgs2[-1]
+        if len(imgs2) > 1:
+            del imgs2[-1]
 
         imgs = sel.xpath('//tr/td[@class=\'tdThumb\']/div/img')
         imgs.extend(imgs2)
