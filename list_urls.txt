@@ -4,9 +4,6 @@
 13;Каютный;http://www.ebay.com/itm/Bayliner-305SB-cierra-Ready-for-Export-/291633320829?forcerrptr=true&hash=item43e6b3537d:g:lswAAOSwEeFVIyH0&item=291633320829
 12;Прогулочный;http://www.ebay.com/itm/2011-Bayliner-175-Bowrider-Boat-3-0L-Mercruiser-Engine-PRICE-REDUCED-/231769220591?forcerrptr=true&hash=item35f685a5ef:g:C1EAAOSwBahVLcVS&item=231769220591
 14;Рыбацкий;http://www.ebay.com/itm/1998-Tracker-Targa-18-Aluminium-Hull-w-Trailer-Mercury-60HP-Trolley-Motor-/141853355903?forcerrptr=true&hash=item21071e6f7f:g:rNcAAOSwsFpWQ~Gu&item=141853355903
-12;Прогулочный;http://mmsc400.manheim.com/MABEL/ECR2I.PGM?CLIENT=SIMUC&CONFIGID=BUYER&ECRTYPE=**&SAUCI=SCAA&SWO=3003812&username=7189969616&locale=en_US&lang=en_US
-13;Каютный;http://mmsc400.manheim.com/MABEL/ECR2I.htm?=&CLIENT=SIMUC&CONFIGID=BUYER&ECRTYPE=%2A%2A&SAUCI=MMAA&SWO=6652391&channel=OVE&listingID=69050978&username=7189969616&locale=en_US&lang=en_US
-14;Рыбацкий;http://mmsc400.manheim.com/MABEL/ECR2I.PGM?CLIENT=SIMUC&CONFIGID=BUYER&ECRTYPE=**&SAUCI=KCAA&SWO=4743820&username=7189969616&locale=en_US&lang=en_US
 14;Рыбацкий;http://www.copart.com/us/Lot/30950745?searchId=1961821578
 12;Прогулочный;http://www.copart.com/us/Lot/35650905?searchId=1961821578
 13;Каютный;http://www.copart.com/us/Lot/28339655?searchId=1961821578

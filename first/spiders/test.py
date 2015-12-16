@@ -29,7 +29,7 @@ class TestSpider(CrawlSpider):
     name = 'scraby'
     mode = None
     file_path = "./list_urls.txt"
-    allowed_domains = ["ebay.com", "copart.com", "www.manheimglobaltrader.com", "boattrader.com"]
+    allowed_domains = ["ebay.com", "copart.com", "manheimglobaltrader.com", "boattrader.com"]
     list_from_file = []
 
     def __init__(self, mode=None, file_path=None,*args, **kwargs):
@@ -77,9 +77,10 @@ class TestSpider(CrawlSpider):
             elif response.url.startswith("http://www.copart.com"):
                 return self.parse_item_copart(response)
             elif response.url.startswith("http://www.boattrader.com"):
-                return self.parse_item_boattrader
-            elif response.url.startswith("https://www.manheimglobaltrader.com"):
-                return self.parse_item_manheimglobaltrader
+                return self.parse_item_boattrader(response)
+            else:
+                #response.url.endswith("https://www.manheimglobaltrader.com")
+                return self.parse_item_manheimglobaltrader(response)
         else:
             print "here!"
 
@@ -133,6 +134,19 @@ class TestSpider(CrawlSpider):
         #price = re.sub(',','.',price)
         return price
 
+    def get_parent_and_type(self, response):
+        print response.url
+        for line in open(self.file_path, 'r'):
+            l = line.split(';')
+            
+            if l[2].strip().find(response.url):
+            #if response.url == l[2].strip():
+                return l
+            #s = re.search(response.url,l[2], flags=re.IGNORECASE)
+            #print l[2]
+            #if s:
+            #    return l
+
     def parse_item_ebay(self, response):
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'itemAttr\']/div/table/tr')
@@ -140,11 +154,9 @@ class TestSpider(CrawlSpider):
         items = []
         item = Board()
 
-	for line in open(self.file_path, 'r'):
-	    l=line.split(';')
-	    if response.url == l[2].strip():
-    		item['parent'] = l[0]
-        	item['boattype'] = l[1]
+        p_t = self.get_parent_and_type(response)
+        item['parent'] = p_t[0]
+        item['boattype'] = p_t[1].encode('utf-8')
         
         item['from_url'] = response.url
         item['boatmodel'] = ''
@@ -272,10 +284,14 @@ class TestSpider(CrawlSpider):
         characts = sel.xpath('//div[@class=\'lot-display-list\']/div')
 
         titlehead = self.get_copart_titlehead(response)
-        print titlehead
+        #print titlehead
 
         items = []
         item = Board()
+
+        p_t = self.get_parent_and_type(response)
+        item['parent'] = p_t[0]
+        item['boattype'] = p_t[1].encode('utf-8')
 
         line = self.list_from_file.split(';')
         if response.url == line[2].strip():
@@ -304,8 +320,8 @@ class TestSpider(CrawlSpider):
             f = self.get_char_field_copart(charact, 'Color')
             if self.is_notnull_item(f):
                 item['color'] = f
-            if self.is_notnull_item(f):
-                item['boattype'] = f
+            # if self.is_notnull_item(f):
+            #     item['boattype'] = f
             f = self.get_char_field_copart(charact, 'Engine Type')
             #item[''] = self.get_char_field_copart(charact, 'Drive')
             #item[''] = self.get_char_field_copart(charact, 'Cylinder')
@@ -397,11 +413,16 @@ class TestSpider(CrawlSpider):
         return price
 
     def parse_item_boattrader(self, response):
+        print "------------------------------------------------------------------"
         sel = Selector(response)
         characts = sel.xpath('//div[@class=\'collapsible open\']/table/tbody/tr')
 
         items = []
         item = Board()
+
+        p_t = self.get_parent_and_type(response)
+        item['parent'] = p_t[0]
+        item['boattype'] = p_t[1].encode('utf-8')
 
         item['boatmodel'] = ''
         item['boatyear'] = ''
@@ -410,12 +431,12 @@ class TestSpider(CrawlSpider):
         item['from_url'] = response.url
 
         for charact in characts:
-            f = self.get_char_field_boattrader(charact, 'Class')
-            if self.is_notnull_item(f):
-                item['boattype'] = re.sub("^\s","",f)
-            f = self.get_char_field_boattrader(charact, 'Category')
-            if self.is_notnull_item(f):
-                item['boattype'] = re.sub("^\s","",f)
+            # f = self.get_char_field_boattrader(charact, 'Class')
+            # if self.is_notnull_item(f):
+            #     item['boattype'] = re.sub("^\s","",f)
+            # f = self.get_char_field_boattrader(charact, 'Category')
+            # if self.is_notnull_item(f):
+            #     item['boattype'] = re.sub("^\s","",f)
             f = self.get_char_field_boattrader(charact, 'Year')
             if self.is_notnull_item(f):
                 item['boatyear'] = re.sub("[^\d]","",f)
@@ -484,6 +505,11 @@ class TestSpider(CrawlSpider):
 
         items = []
         item = Board()
+
+        p_t = self.get_parent_and_type(response)
+        item['parent'] = p_t[0]
+        item['boattype'] = p_t[1]
+
         item['boatmodel'] = ''
         item['boatyear'] = ''
         item['boatbrand'] = ''
@@ -494,9 +520,9 @@ class TestSpider(CrawlSpider):
             #item[''] = self.get_char_field_manheimglobaltrader(charact, 'Engine Volume:')
             #item[''] = self.get_char_field_manheimglobaltrader(charact, 'Doors')
 
-            f = self.get_char_field_manheimglobaltrader(charact, 'Unit Type')
-            if self.is_notnull_item(f):
-                item['boattype'] = f
+            # f = self.get_char_field_manheimglobaltrader(charact, 'Unit Type')
+            # if self.is_notnull_item(f):
+            #     item['boattype'] = f
             f = self.get_char_field_manheimglobaltrader(charact, 'Year')
             if self.is_notnull_item(f):
                 item['boatyear'] = re.sub("[^\d]","",f)
