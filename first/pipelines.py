@@ -13,7 +13,7 @@ class FirstPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         item.setdefault('pagetitle', item['boatyear']+' '+item['boatbrand']+' '+item['boatmodel'])
         #item.setdefault('parent', '1653')
-        #item.setdefault('template', '5')
+        item.setdefault('template', '5')
 
         return [Request(''.join(v), meta={'item': item})
             for x,v in item.items() if x.startswith('url')]
@@ -27,11 +27,8 @@ class FirstPipeline(ImagesPipeline):
 
                 if x.startswith('url'):    
                     if request.url == response.meta['item'][x]:
-                        print x+" "+request.url + " fonded"
                         n = re.search('\d{1,}',x, flags=re.IGNORECASE)
-                        #print n.group(0)
                         if n:
-                            print x+" "+request.url + " n"
                             index = 'gallery'+n.group(0)
                             key = "%s" % (response.meta['item'][index])
                             key = re.sub('//','/',key)

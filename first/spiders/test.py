@@ -140,15 +140,13 @@ class TestSpider(CrawlSpider):
         items = []
         item = Board()
 
-        lines = self.list_from_file.split('\r\n')
-        for line in lines:
-            l = line.split(';')
-            if response.url == l[2].strip():
-                item['parent'] = l[0]
-                item['boattype'] = l[1]
+	for line in open(self.file_path, 'r'):
+	    l=line.split(';')
+	    if response.url == l[2].strip():
+    		item['parent'] = l[0]
+        	item['boattype'] = l[1]
         
         item['from_url'] = response.url
-
         item['boatmodel'] = ''
         item['boatyear'] = ''
         item['boatbrand'] = ''
@@ -188,12 +186,12 @@ class TestSpider(CrawlSpider):
             #item[''] = self.get_char_field_ebay(charact, 'Hull Material')
             #item[''] = self.get_char_field_ebay(charact, 'Primary Fuel Type')
             #item[''] = self.get_char_field_ebay(charact, 'Fuel Capacity')
-            f = self.get_char_field_ebay(charact, 'Type')
-            if self.is_notnull_item(f):
-                item['boattype'] = f
-            f = self.get_char_field_ebay(charact, 'Тип')
-            if self.is_notnull_item(f):
-                item['boattype'] = f
+            #f = self.get_char_field_ebay(charact, 'Type')
+            #if self.is_notnull_item(f):
+            #    item['boattype'] = f
+            #f = self.get_char_field_ebay(charact, 'Тип')
+            #if self.is_notnull_item(f):
+            #    item['boattype'] = f
         items.append(item)
 
         sel = Selector(response)
