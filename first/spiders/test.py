@@ -139,9 +139,11 @@ class TestSpider(CrawlSpider):
         for line in open(self.file_path, 'r'):
             l = line.split(';')
             
-            if l[2].strip().find(response.url):
-            #if response.url == l[2].strip():
+
+            if l[2].strip().find(response.url) == 0:
                 return l
+
+            #if response.url == l[2].strip():
             #s = re.search(response.url,l[2], flags=re.IGNORECASE)
             #print l[2]
             #if s:
