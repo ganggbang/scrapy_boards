@@ -432,6 +432,11 @@ class TestSpider(CrawlSpider):
         item['old_price'] = self.parse_boattrader_price(response)
         item['from_url'] = response.url
 
+        bdmodel = sel.xpath('//span[@class=\'bd-model\']').extract();
+        if bdmodel:
+            tt = ''.join(bdmodel[0])
+            item['boatmodel'] = re.sub('<.*?>','',tt)
+
         for charact in characts:
             # f = self.get_char_field_boattrader(charact, 'Class')
             # if self.is_notnull_item(f):
