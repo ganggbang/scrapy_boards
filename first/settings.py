@@ -10,6 +10,7 @@ BOT_NAME = 'board_get'
 BOT_VERSION = '1.0'
 
 #CLOSESPIDER_ITEMCOUNT=10
+DOWNLOAD_DELAY = 1
 
 SPIDER_MODULES = ['first.spiders']
 NEWSPIDER_MODULE = 'first.spiders'
